@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="https://code.jquery.com/pep/0.4.2/pep.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/ammo.js"></script>
+        <script src="https://preview.babylonjs.com/cannon.js"></script>
+        <script src="https://preview.babylonjs.com/Oimo.js"></script>
+        <script src="https://preview.babylonjs.com/libktx.js"></script>
+        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+    </head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true }); };
+        var createScene = function () {
+        
+            // TODO : LeftInPixels ? ???? ??=> flag? ?? ???? ??
+            
+            var scene = new BABYLON.Scene(engine);
+            var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+        
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GAMEPLAY");
+        
+            // background
+            var backgroundImg = new BABYLON.GUI.Image("bg", "https://i.imgur.com/bOZWt44.png");
+            var sky = new BABYLON.GUI.Image("sky", "https://i.imgur.com/IS4Zvcp.png");
+            advancedTexture.addControl(sky);  
+            advancedTexture.addControl(backgroundImg);
+        
+            // flag
+            var flag = new BABYLON.GUI.Image("flg", "https://i.imgur.com/XDwxjRT.png");
+                flag.width = "200px";
+                flag.height = "200px";
+                flag.top = "-180px";
+            advancedTexture.addControl(flag);
+        
+            // CAR
+            var carIMG1 = new BABYLON.GUI.Image("carimg1", "https://i.imgur.com/NOj8Rre.png"); 
+            var carIMG2 = new BABYLON.GUI.Image("carimg2", "https://i.imgur.com/qnjaMBO.png");
+            var carIMG3 = new BABYLON.GUI.Image("carimg3", "https://i.imgur.com/ealqcp6.png");
+            var carIMG4 = new BABYLON.GUI.Image("carimg4", "https://i.imgur.com/uw2QVSi.png");
+        
+            // Car class : var name = new Car(img file, "first/second/third/fourth", advancedTexture);
+            var car1 = new Car(carIMG1, "first", advancedTexture);
+            var car2 = new Car(carIMG2, "second", advancedTexture);
+            var car3 = new Car(carIMG3, "third", advancedTexture);
+            var car4 = new Car(carIMG4, "fourth", advancedTexture);
+        
+            // GUI - QUIZ
+            var advancedTexture_gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("Imgame GUI");
+            var quizIMG = new BABYLON.GUI.Image("quizimg", "https://i.imgur.com/BGnZPQm.png");
+            var bottomGUI = new Quiz_GUI(quizIMG, "1", "2", "3", "4", advancedTexture_gui);
+        
+            // GAME START - BACKGROUND LOOP
+            var game_running = true;
+            var moved = 0;
+            var goal = 5000;
+            var velocity = 5;
+                flag.leftInPixels = goal;
+        
+            var goalIn = new Array();
+        
+            scene.onBeforeRenderObservable.add(()=>{
+        
+                if (game_running)
+                if (velocity > 0)
+                {
+                    moved += velocity;
+                }
+                if (moved >= goal)
+                {
+                    velocity -= 0.1;
+                }
+        
+                car1.car_IMG.scaleX = window.innerWidth * window.innerHeight / 1500 / 1500;
+                car1.car_IMG.scaleY = window.innerWidth * window.innerHeight / 1500 / 1500;
+        
+                car2.car_IMG.scaleX = window.innerWidth * window.innerHeight / 1500 / 1500;
+                car2.car_IMG.scaleY = window.innerWidth * window.innerHeight / 1500 / 1500;
+        
+                car3.car_IMG.scaleX = window.innerWidth * window.innerHeight / 1500 / 1500;
+                car3.car_IMG.scaleY = window.innerWidth * window.innerHeight / 1500 / 1500;
+        
+                car4.car_IMG.scaleX = window.innerWidth * window.innerHeight / 1500 / 1500;
+                car4.car_IMG.scaleY = window.innerWidth * window.innerHeight / 1500 / 1500;
+        
+                bottomGUI.gui_quiz.scaleX = window.innerWidth * window.innerHeight / 1000 / 1000;
+                bottomGUI.gui_quiz.scaleY = window.innerWidth * window.innerHeight / 1000 / 1000;
+                bottomGUI.gui_ans.scaleX = window.innerWidth * window.innerHeight / 1000 / 1000;
+                bottomGUI.gui_ans.scaleY = window.innerWidth * window.innerHeight / 1000 / 1000;
+        
+                if(goalIn.length == 4)
+                {
+                    game_running = false;
+                }
+        
+            });
+        
+            return scene;
+        };
+        
+        var Car = (function() {
+            function Car(_car_IMG, order, advancedTexture_object)
+            {
+                this.order = order;
+                this.advancedTexture_object = advancedTexture_object;
+                this.car_IMG = _car_IMG;
+        
+                // car position setting
+                if (this.order == "first")
+                {
+                     this.car_IMG.left = "-18%";
+                }
+                else if (this.order == "second")
+                {
+                    this.car_IMG.left = "-6%";
+                }
+                else if (this.order == "third")
+                {
+                    this.car_IMG.left = "6%";
+                }
+                else if (this.order == "fourth") 
+                {
+                    this.car_IMG.left = "18%";
+                }
+        
+                // car img
+                this.car_IMG.width = "300px";
+                this.car_IMG.height = "300px";
+                
+                // add controls
+                this.advancedTexture_object.addControl(this.car_IMG);
+            }
+        
+            Car.prototype.moveCar = function (weight)
+            {
+                var _this = this;
+                _this.car_IMG.leftInPixels += weight;
+            };
+        
+            Car.prototype.goForward = function ()
+            {
+                var _this = this;
+        
+                if (this.order == "first")
+                {
+                    this.car_IMG.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                }
+                else if (this.order == "second")
+                {
+                    this.car_IMG.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                    this.car_IMG.left = "25%";
+                }
+                else if (this.order == "third")
+                {
+                    this.car_IMG.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+                    this.car_IMG.left = "-25%";
+                }
+                else if (this.order == "fourth") 
+                {
+                    this.car_IMG.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+                }
+        
+                _this.moveCar(5);
+            };
+        
+            return Car;
+        } () );
+        
+        var OBJ = (function() {
+            function OBJ(_obj_img, left_or_right, advancedTexture)
+            {
+        
+            }
+        
+            return OBJ;
+        } () );
+        
+        var Quiz_GUI = (function() {
+            function Quiz_GUI(_quiz_IMG, _answer_TEXT1, _answer_TEXT2, _answer_TEXT3, _answer_TEXT4, advancedTexture_gui)
+            {
+                this.quiz_IMG = _quiz_IMG;
+        
+                // ans texts
+                this.answer_TEXT1 = new BABYLON.GUI.TextBlock("ans1", _answer_TEXT1);
+                this.answer_TEXT2 = new BABYLON.GUI.TextBlock("ans2", _answer_TEXT2);
+                this.answer_TEXT3 = new BABYLON.GUI.TextBlock("ans3", _answer_TEXT3);
+                this.answer_TEXT4 = new BABYLON.GUI.TextBlock("ans4", _answer_TEXT4);
+                this.advancedTexture_gui = advancedTexture_gui;
+            
+                // quiz box gui
+                this.gui_quiz = new BABYLON.GUI.Rectangle("GUI_QUIZ");
+                this.gui_quiz.width = "400px";
+                this.gui_quiz.height = "200px";
+                
+        
+                this.gui_quiz.background = "white";
+                this.gui_quiz.color = "orange";
+                this.gui_quiz.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+                this.gui_quiz.cente
+                this.gui_quiz.left = "-20%";
+                this.gui_quiz.thickness = 2;
+        
+                // answer box gui
+                this.gui_ans = new BABYLON.GUI.Rectangle("GUI_ANS");
+                this.gui_ans.width = "200px";
+                this.gui_ans.height = "200px";
+                
+                this.gui_ans.background = "white";
+                this.gui_ans.color = "orange";
+                this.gui_ans.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+                this.gui_ans.left = "20%";
+                this.gui_ans.thickness = 2;
+        
+                // buttons in answer box
+                this.answerbutton1 = BABYLON.GUI.Button.CreateSimpleButton("AnswerButton1");
+                this.answerbutton1.width = .5;
+                this.answerbutton1.height = .5;
+                this.answerbutton1.thickness = 2;
+                this.answerbutton1.background = "white";
+                this.answerbutton1.color = "orange";
+                this.answerbutton1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                this.answerbutton1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        
+                this.answerbutton2 = BABYLON.GUI.Button.CreateSimpleButton("AnswerButton2");
+                this.answerbutton2.width = .5;
+                this.answerbutton2.height = .5;
+                this.answerbutton2.thickness = 2;
+                this.answerbutton2.background = "white";
+                this.answerbutton2.color = "orange";
+                this.answerbutton2.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+                this.answerbutton2.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        
+                this.answerbutton3 = BABYLON.GUI.Button.CreateSimpleButton("AnswerButton3");
+                this.answerbutton3.width = .5;
+                this.answerbutton3.height = .5;
+                this.answerbutton3.thickness = 2;
+                this.answerbutton3.background = "white";
+                this.answerbutton3.color = "orange";
+                this.answerbutton3.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                this.answerbutton3.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+        
+                this.answerbutton4 = BABYLON.GUI.Button.CreateSimpleButton("AnswerButton4");
+                this.answerbutton4.width = .5;
+                this.answerbutton4.height = .5;
+                this.answerbutton4.thickness = 2;
+                this.answerbutton4.background = "white";
+                this.answerbutton4.color = "orange";
+                this.answerbutton4.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+                this.answerbutton4.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+        
+                // add controls - to advancedTexture_gui
+                this.answerbutton1.addControl(this.answer_TEXT1);
+                this.answerbutton2.addControl(this.answer_TEXT2);
+                this.answerbutton3.addControl(this.answer_TEXT3);
+                this.answerbutton4.addControl(this.answer_TEXT4);
+                this.advancedTexture_gui.addControl(this.gui_quiz);
+                this.advancedTexture_gui.addControl(this.gui_ans);
+        
+                // add controls - to quiz box
+                this.gui_quiz.addControl(this.quiz_IMG);
+        
+                // add controls - to answer box
+                this.gui_ans.addControl(this.answerbutton1);
+                this.gui_ans.addControl(this.answerbutton2);    
+                this.gui_ans.addControl(this.answerbutton3);    
+                this.gui_ans.addControl(this.answerbutton4);
+            }
+        
+            Quiz_GUI.prototype.setQuiz = function(_quiz_IMG, _answer_TEXT1, _answer_TEXT2, _answer_TEXT3, _answer_TEXT4)
+            {
+                var _this = this;
+                _this.answer_TEXT1 = _answer_TEXT1;
+                _this.answer_TEXT2 = _answer_TEXT2;
+                _this.answer_TEXT3 = _answer_TEXT3;
+                _this.answer_TEXT4 = _answer_TEXT4;
+        
+                _this.quiz_IMG = _quiz_IMG;
+                _this.answer_TEXT = _answer_TEXT;
+            };
+        
+            return Quiz_GUI;
+        } () );
+        
+        engine = createDefaultEngine();
+        if (!engine) throw 'engine should not be null.';
+        scene = createScene();;
+        sceneToRender = scene
+
+        engine.runRenderLoop(function () {
+            if (sceneToRender) {
+                sceneToRender.render();
+            }
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
